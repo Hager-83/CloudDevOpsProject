@@ -60,3 +60,52 @@ docker compose down
 ```
 
 The MySQL named volume is retained.
+
+## Terraform Infrastructure Progress
+
+### Completed
+
+- Configured a dedicated IAM user for local Terraform execution.
+- Created an S3 bucket for remote Terraform state with:
+  - Versioning enabled.
+  - AES256 server-side encryption.
+  - Public access blocked.
+  - Terraform deletion protection.
+- Configured the main infrastructure to use the S3 backend
+  with native S3 state locking.
+- Implemented and deployed the network module:
+  - One VPC with DNS support.
+  - Two public and two private subnets across two Availability Zones.
+  - An Internet Gateway.
+  - One NAT Gateway with an Elastic IP.
+  - Public and private route tables and subnet associations.
+  - Separate public and private Network ACLs.
+- Created three private ECR repositories:
+  - `ivolve/auth-service`
+  - `ivolve/frontend`
+  - `ivolve/roadmap-service`
+- Configured ECR repositories with immutable image tags
+  and AES256 encryption.
+- Exposed VPC, subnet, and ECR repository outputs.
+
+### Validation
+
+- Terraform initialization and validation completed successfully.
+- The network deployment was verified with a subsequent plan
+  reporting no changes.
+- All three ECR repository URLs were retrieved successfully.
+
+### Current Limitations
+
+- Network ACLs currently allow all IPv4 inbound and outbound traffic.
+- Both private subnets share one NAT Gateway in a single Availability Zone.
+- Bootstrap state is currently stored locally and excluded from Git.
+- ECR repositories are ready; application images have not been pushed yet.
+- NAT Gateway and public IPv4 charges apply while provisioned.
+
+### Next Steps
+
+- Provision EKS and its worker nodes.
+- Configure GitHub Actions authentication using AWS OIDC.
+- Build and push application images to ECR.
+- Deploy the application to EKS.
