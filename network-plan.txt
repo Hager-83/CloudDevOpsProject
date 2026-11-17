@@ -1,0 +1,104 @@
+module.network.aws_eip.nat: Refreshing state... [id=eipalloc-025157e8f9c8cddd1]
+module.network.aws_vpc.main: Refreshing state... [id=vpc-00fcb83d25332ed97]
+module.network.aws_internet_gateway.main: Refreshing state... [id=igw-03250d6cf92a49825]
+module.network.aws_route_table.private: Refreshing state... [id=rtb-036b9172dd411e128]
+module.network.aws_route_table.public: Refreshing state... [id=rtb-023007469c88b2946]
+module.network.aws_subnet.private["b"]: Refreshing state... [id=subnet-007cdbb06ae38108c]
+module.network.aws_network_acl.main["private"]: Refreshing state... [id=acl-0ed259e56c8e4d362]
+module.network.aws_subnet.public["b"]: Refreshing state... [id=subnet-0a7e7dabbd423c0c1]
+module.network.aws_network_acl.main["public"]: Refreshing state... [id=acl-0239f56a0d6869e08]
+module.network.aws_subnet.private["a"]: Refreshing state... [id=subnet-0b7cf7a2fe9d4ae5d]
+module.network.aws_subnet.public["a"]: Refreshing state... [id=subnet-058b130251e033a5f]
+module.network.aws_route.public_internet: Refreshing state... [id=r-rtb-023007469c88b29461080289494]
+module.network.aws_route_table_association.private["b"]: Refreshing state... [id=rtbassoc-0f03ba7aee4305371]
+module.network.aws_route_table_association.private["a"]: Refreshing state... [id=rtbassoc-032dc1c266851892e]
+module.network.aws_network_acl_association.private["b"]: Refreshing state... [id=aclassoc-0df63fcae68ab842d]
+module.network.aws_network_acl_association.private["a"]: Refreshing state... [id=aclassoc-0681c73705149abca]
+module.network.aws_route_table_association.public["b"]: Refreshing state... [id=rtbassoc-0928fcd2f46f59f9c]
+module.network.aws_route_table_association.public["a"]: Refreshing state... [id=rtbassoc-0b011a309cad133c6]
+module.network.aws_network_acl_association.public["a"]: Refreshing state... [id=aclassoc-0807c106f957135a8]
+module.network.aws_network_acl_association.public["b"]: Refreshing state... [id=aclassoc-04662fd7430cf7890]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+-/+ destroy and then create replacement
+
+Terraform will perform the following actions:
+
+  # module.network.aws_eip.nat is tainted, so must be replaced
+-/+ resource "aws_eip" "nat" {
+      ~ allocation_id            = "eipalloc-025157e8f9c8cddd1" -> (known after apply)
+      ~ arn                      = "arn:aws:ec2:us-east-1:211017377170:elastic-ip/eipalloc-025157e8f9c8cddd1" -> (known after apply)
+      + association_id           = (known after apply)
+      + carrier_ip               = (known after apply)
+      + customer_owned_ip        = (known after apply)
+      ~ id                       = "eipalloc-025157e8f9c8cddd1" -> (known after apply)
+      + instance                 = (known after apply)
+      + ipam_pool_id             = (known after apply)
+      ~ network_border_group     = "us-east-1" -> (known after apply)
+      + network_interface        = (known after apply)
+      + private_dns              = (known after apply)
+      + private_ip               = (known after apply)
+      + ptr_record               = (known after apply)
+      ~ public_dns               = "ec2-52-70-116-118.compute-1.amazonaws.com" -> (known after apply)
+      ~ public_ip                = "52.70.116.118" -> (known after apply)
+      ~ public_ipv4_pool         = "amazon" -> (known after apply)
+        tags                     = {
+            "Name" = "ivolve-nat-eip"
+        }
+        # (4 unchanged attributes hidden)
+    }
+
+  # module.network.aws_nat_gateway.main will be created
+  + resource "aws_nat_gateway" "main" {
+      + allocation_id                      = (known after apply)
+      + association_id                     = (known after apply)
+      + auto_provision_zones               = (known after apply)
+      + auto_scaling_ips                   = (known after apply)
+      + availability_mode                  = (known after apply)
+      + connectivity_type                  = "public"
+      + id                                 = (known after apply)
+      + network_interface_id               = (known after apply)
+      + private_ip                         = (known after apply)
+      + public_ip                          = (known after apply)
+      + region                             = "us-east-1"
+      + regional_nat_gateway_address       = (known after apply)
+      + regional_nat_gateway_auto_mode     = (known after apply)
+      + route_table_id                     = (known after apply)
+      + secondary_allocation_ids           = (known after apply)
+      + secondary_private_ip_address_count = (known after apply)
+      + secondary_private_ip_addresses     = (known after apply)
+      + subnet_id                          = "subnet-058b130251e033a5f"
+      + tags                               = {
+          + "Name" = "ivolve-nat"
+        }
+      + tags_all                           = {
+          + "ManagedBy" = "Terraform"
+          + "Name"      = "ivolve-nat"
+          + "Project"   = "ivolve"
+        }
+      + vpc_id                             = (known after apply)
+    }
+
+  # module.network.aws_route.private_internet will be created
+  + resource "aws_route" "private_internet" {
+      + destination_cidr_block = "0.0.0.0/0"
+      + id                     = (known after apply)
+      + instance_id            = (known after apply)
+      + instance_owner_id      = (known after apply)
+      + nat_gateway_id         = (known after apply)
+      + network_interface_id   = (known after apply)
+      + origin                 = (known after apply)
+      + region                 = "us-east-1"
+      + route_table_id         = "rtb-036b9172dd411e128"
+      + state                  = (known after apply)
+    }
+
+Plan: 3 to add, 0 to change, 1 to destroy.
+
+─────────────────────────────────────────────────────────────────────────────
+
+Note: You didn't use the -out option to save this plan, so Terraform can't
+guarantee to take exactly these actions if you run "terraform apply" now.
+Releasing state lock. This may take a few moments...

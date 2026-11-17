@@ -4,3 +4,12 @@ __pycache__/
 *.pyc
 target/
 
+# Terraform local files and sensitive state
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+*.tfvars.json
+crash.log
+crash.*.log
