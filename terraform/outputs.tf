@@ -17,3 +17,8 @@ output "ecr_repository_urls" {
   description = "ECR repository URLs for application services"
   value       = module.ecr.repository_urls
 }
+
+output "github_actions_role_arn" {
+  description = "IAM role used by GitHub Actions to push images to ECR"
+  value       = module.github_oidc.role_arn
+}

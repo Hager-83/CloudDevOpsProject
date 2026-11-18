@@ -60,17 +60,14 @@ docker compose down
 ```
 
 The MySQL named volume is retained.
-
-## Terraform Infrastructure Progress
+## Terraform Infrastructure
 
 ### Completed
 
 - Configured a dedicated IAM user for local Terraform execution.
-- Created an S3 bucket for remote Terraform state with:
-  - Versioning enabled.
-  - AES256 server-side encryption.
-  - Public access blocked.
-  - Terraform deletion protection.
+- Created an S3 bucket for Terraform state with versioning,
+  AES256 encryption, public access blocking, and Terraform
+  deletion protection.
 - Configured the main infrastructure to use the S3 backend
   with native S3 state locking.
 - Implemented and deployed the network module:
@@ -80,32 +77,100 @@ The MySQL named volume is retained.
   - One NAT Gateway with an Elastic IP.
   - Public and private route tables and subnet associations.
   - Separate public and private Network ACLs.
-- Created three private ECR repositories:
+- Created three private ECR repositories with immutable image tags
+  and AES256 encryption:
   - `ivolve/auth-service`
   - `ivolve/frontend`
   - `ivolve/roadmap-service`
-- Configured ECR repositories with immutable image tags
-  and AES256 encryption.
-- Exposed VPC, subnet, and ECR repository outputs.
+- Implemented and deployed the EKS module:
+  - EKS cluster named `ivolve-eks`.
+  - Two managed node groups with one worker node each.
+  - Worker nodes in separate private subnets in `us-east-1a`
+    and `us-east-1b`.
+  - Private API endpoint access and public API access restricted
+    to the configured administrator CIDR.
+  - IAM roles for the cluster and worker nodes.
+  - Cluster administrator access for the Terraform IAM user.
+- Created the GitHub Actions OIDC provider and IAM role:
+  - Trust restricted to the `main` branch of
+    `Hager-83/CloudDevOpsProject`.
+  - ECR image push permissions restricted to the three
+    project repositories.
+- Exposed VPC, subnet, ECR repository, and GitHub Actions role outputs.
 
 ### Validation
 
 - Terraform initialization and validation completed successfully.
-- The network deployment was verified with a subsequent plan
-  reporting no changes.
+- The latest Terraform plan reported no changes after provisioning.
 - All three ECR repository URLs were retrieved successfully.
+- Both EKS worker nodes reported `Ready` in different Availability Zones.
+- AWS networking, CoreDNS, and kube-proxy pods reported `Running`
+  with all containers ready and zero restarts.
+- The GitHub Actions IAM role ARN was retrieved successfully.
+- End-to-end GitHub OIDC authentication has not been tested yet.
+
+### Local Terraform Usage
+
+Authenticate using the local AWS CLI profile:
+
+```bash
+aws login --profile ivolve
+export AWS_PROFILE=ivolve
+```
+
+Initialize and review the infrastructure:
+
+```bash
+terraform -chdir=terraform init
+terraform -chdir=terraform validate
+terraform -chdir=terraform plan
+```
+
+Configure kubectl access:
+
+```bash
+aws eks update-kubeconfig \
+  --name ivolve-eks \
+  --region us-east-1 \
+  --profile ivolve \
+  --alias ivolve-eks
+```
+
+Verify the cluster:
+
+```bash
+kubectl --context ivolve-eks get nodes \
+  -L topology.kubernetes.io/zone
+
+kubectl --context ivolve-eks get pods -n kube-system
+```
+
+### GitHub Actions IAM Role
+
+```text
+arn:aws:iam::211017377170:role/ivolve-github-actions-role
+```
 
 ### Current Limitations
 
 - Network ACLs currently allow all IPv4 inbound and outbound traffic.
 - Both private subnets share one NAT Gateway in a single Availability Zone.
-- Bootstrap state is currently stored locally and excluded from Git.
-- ECR repositories are ready; application images have not been pushed yet.
-- NAT Gateway and public IPv4 charges apply while provisioned.
+- Bootstrap state is stored locally and excluded from Git.
+  Retain a secure backup of this state.
+- ECR repositories are provisioned; application images have not
+  been pushed yet.
+- Application workloads and ArgoCD have not been deployed to EKS.
+- GitHub Actions workflows have not been configured yet.
+- Provisioned AWS resources, including EKS, EC2 worker nodes,
+  EBS volumes, NAT Gateway, and public IPv4 addresses, incur charges.
 
 ### Next Steps
 
-- Provision EKS and its worker nodes.
-- Configure GitHub Actions authentication using AWS OIDC.
-- Build and push application images to ECR.
-- Deploy the application to EKS.
+- Create Kubernetes manifests for the application and database.
+- Configure persistent storage, environment configuration,
+  Secrets, Services, and frontend Ingress.
+- Implement reusable GitHub Actions workflows to build images,
+  scan them with Trivy, push them to ECR, and update manifests.
+- Verify GitHub Actions authentication to AWS using OIDC.
+- Configure ArgoCD to deploy and synchronize the application.
+- Complete setup instructions and architecture documentation.

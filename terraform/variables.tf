@@ -9,3 +9,8 @@ variable "project_name" {
   type        = string
   default     = "ivolve"
 }
+
+variable "admin_cidr" {
+  description = "Administrator public IPv4 address with /32"
+  type        = string
+}
