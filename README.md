@@ -159,7 +159,7 @@ arn:aws:iam::211017377170:role/ivolve-github-actions-role
   Retain a secure backup of this state.
 - ECR repositories are provisioned; application images have not
   been pushed yet.
-- Application workloads and ArgoCD have not been deployed to EKS.
+- MySQL is deployed; application microservices and ArgoCD are not deployed yet.
 - GitHub Actions workflows have not been configured yet.
 - Provisioned AWS resources, including EKS, EC2 worker nodes,
   EBS volumes, NAT Gateway, and public IPv4 addresses, incur charges.
@@ -174,3 +174,76 @@ arn:aws:iam::211017377170:role/ivolve-github-actions-role
 - Verify GitHub Actions authentication to AWS using OIDC.
 - Configure ArgoCD to deploy and synchronize the application.
 - Complete setup instructions and architecture documentation.
+
+## Kubernetes Deployment Progress
+
+### Completed
+
+- Created the `ivolve` namespace.
+- Installed the EKS Pod Identity Agent and Amazon EBS CSI Driver
+  using Terraform.
+- Configured a dedicated IAM role for the EBS CSI controller
+  using EKS Pod Identity.
+- Created the `ivolve-gp3` StorageClass with:
+  - Encrypted gp3 volumes.
+  - WaitForFirstConsumer volume binding.
+  - Volume expansion enabled.
+  - Retain reclaim policy.
+- Created the application ConfigMap.
+- Created the application Secret from the local `.env` file.
+  Secret values are excluded from Git.
+- Deployed MySQL using a StatefulSet and a Headless Service.
+- Provisioned and attached a 10 GiB persistent EBS volume.
+- Prepared Deployments and ClusterIP Services for:
+  - `auth-service`
+  - `roadmap-service`
+  - `frontend`
+- Configured resource requests, memory limits, and startup,
+  readiness, and liveness probes for the application containers.
+
+### Validation
+
+- Pod Identity Agent and EBS CSI components rolled out successfully.
+- The MySQL PVC reported `Bound`.
+- The MySQL Pod reported `1/1 Running`.
+- A database connection test succeeded using the application user.
+- The three application Deployments and Services passed
+  Kubernetes server-side dry-run validation.
+
+### Current Limitations
+
+- Application images have not been pushed to ECR.
+- Application Deployments and Services have been validated
+  but have not been applied to the cluster.
+- The `initial` image tags are placeholders that CI will replace.
+- Database persistence across Pod recreation has not yet been
+  verified with a test record.
+- Frontend Ingress and its controller are not configured yet.
+- GitHub Actions and ArgoCD are not configured yet.
+- The application Secret must be created separately when setting
+  up a new cluster.
+
+### Recreate the Application Secret
+
+Create the namespace first, then run from the repository root:
+
+```bash
+kubectl --context ivolve-eks -n ivolve create secret generic app-secrets \
+  --from-env-file=.env \
+  --dry-run=client -o yaml \
+  | kubectl --context ivolve-eks apply -f -
+```
+
+Use unquoted `KEY=value` entries without surrounding whitespace
+in the local environment file. Never commit the `.env` file
+or generated Secret values.
+
+### Next Steps
+
+- Configure GitHub Actions to build, scan, and push application images.
+- Replace placeholder image tags with CI-generated tags.
+- Configure frontend Ingress and its controller.
+- Configure ArgoCD to deploy and synchronize the application.
+- Verify application functionality and database persistence.
+
+
