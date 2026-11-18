@@ -1,0 +1,26 @@
+name: frontend CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "app/frontend/**"
+      - ".github/workflows/frontend.yml"
+      - ".github/workflows/reusable-build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: ci-frontend-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  image:
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/reusable-build.yml
+    with:
+      service: frontend

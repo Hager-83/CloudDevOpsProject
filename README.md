@@ -151,30 +151,6 @@ kubectl --context ivolve-eks get pods -n kube-system
 arn:aws:iam::211017377170:role/ivolve-github-actions-role
 ```
 
-### Current Limitations
-
-- Network ACLs currently allow all IPv4 inbound and outbound traffic.
-- Both private subnets share one NAT Gateway in a single Availability Zone.
-- Bootstrap state is stored locally and excluded from Git.
-  Retain a secure backup of this state.
-- ECR repositories are provisioned; application images have not
-  been pushed yet.
-- MySQL is deployed; application microservices and ArgoCD are not deployed yet.
-- GitHub Actions workflows have not been configured yet.
-- Provisioned AWS resources, including EKS, EC2 worker nodes,
-  EBS volumes, NAT Gateway, and public IPv4 addresses, incur charges.
-
-### Next Steps
-
-- Create Kubernetes manifests for the application and database.
-- Configure persistent storage, environment configuration,
-  Secrets, Services, and frontend Ingress.
-- Implement reusable GitHub Actions workflows to build images,
-  scan them with Trivy, push them to ECR, and update manifests.
-- Verify GitHub Actions authentication to AWS using OIDC.
-- Configure ArgoCD to deploy and synchronize the application.
-- Complete setup instructions and architecture documentation.
-
 ## Kubernetes Deployment Progress
 
 ### Completed
@@ -238,12 +214,27 @@ Use unquoted `KEY=value` entries without surrounding whitespace
 in the local environment file. Never commit the `.env` file
 or generated Secret values.
 
-### Next Steps
+## Continuous Integration with GitHub Actions
 
-- Configure GitHub Actions to build, scan, and push application images.
-- Replace placeholder image tags with CI-generated tags.
-- Configure frontend Ingress and its controller.
-- Configure ArgoCD to deploy and synchronize the application.
-- Verify application functionality and database persistence.
+Each microservice has a dedicated workflow that calls a shared
+reusable workflow.
 
+Pipeline stages:
+1. Build the Docker image.
+2. Scan the image with Trivy.
+3. Authenticate to AWS using OIDC.
+4. Push the image to Amazon ECR.
+5. Delete the local image.
+6. Update the Kubernetes image reference.
+7. Commit and push the manifest update.
 
+HIGH or CRITICAL vulnerability findings block image publishing.
+
+Images use unique tags containing the commit SHA, workflow run ID,
+and run attempt to support immutable ECR repositories.
+
+Workflows run on GitHub-hosted runners. Manifest-only changes do
+not trigger image builds.
+
+The workflows are configured but have not yet been verified by
+a successful run. Application deployment will be managed by ArgoCD.

@@ -1,0 +1,26 @@
+name: roadmap-service CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "app/roadmap-service/**"
+      - ".github/workflows/roadmap-service.yml"
+      - ".github/workflows/reusable-build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: ci-roadmap-service-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  image:
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/reusable-build.yml
+    with:
+      service: roadmap-service
